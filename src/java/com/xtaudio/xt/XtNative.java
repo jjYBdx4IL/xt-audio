@@ -1,18 +1,14 @@
 package com.xtaudio.xt;
 
-import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.NativeLibrary;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
-import com.sun.jna.win32.StdCallFunctionMapper;
 import com.sun.jna.win32.StdCallLibrary;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /* Copyright (C) 2015-2016 Sjoerd van Kreel.
  *
@@ -31,7 +27,12 @@ import java.util.Map;
  */
 final class XtNative {
 
-    private static boolean initialized = false;
+    protected final static NativeLibrary lib;
+    
+    static {
+        lib = NativeLibrary.getInstance("xt-core");
+        Native.register(lib);
+    }
 
     private XtNative() {
     }
@@ -131,28 +132,6 @@ final class XtNative {
 
         void callback(Pointer stream, Pointer input, Pointer output, int frames,
                 double time, long position, boolean timeValid, long error, Pointer user);
-    }
-
-    static void init() {
-        if (initialized)
-            return;
-        boolean isX64 = Pointer.SIZE == 8;
-        System.setProperty("jna.encoding", "UTF-8");
-        boolean isWin32 = System.getProperty("os.name").contains("Windows");
-        Map<Object, Object> options = new HashMap<>();
-        if (isWin32) {
-            options.put(Library.OPTION_FUNCTION_MAPPER, new StdCallFunctionMapper());
-            options.put(Library.OPTION_CALLING_CONVENTION, StdCallLibrary.STDCALL_CONVENTION);
-        }
-        if (isWin32 && !isX64)
-            Native.register(NativeLibrary.getInstance("win32-x86/xt-core.dll", options));
-        else if (isWin32 && isX64)
-            Native.register(NativeLibrary.getInstance("win32-x64/xt-core.dll", options));
-        else if (!isWin32 && !isX64)
-            Native.register(NativeLibrary.getInstance("linux-x86/libxt-core.so", options));
-        else
-            Native.register(NativeLibrary.getInstance("linux-x64/libxt-core.so", options));
-        initialized = true;
     }
 
     static void handleError(long error) {

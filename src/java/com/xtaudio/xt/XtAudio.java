@@ -17,7 +17,6 @@ public final class XtAudio implements XtCloseable {
         XtAudio.trace = trace;
         XtAudio.fatal = fatal;
         XtAudio.nativeTrace = XtAudio::ForwardTrace;
-        XtNative.init();
         XtNative.XtAudioInit(id, window, nativeTrace, fatal);
     }
 
